@@ -37,12 +37,12 @@ with tabs[0]:
         )
         scolarite = st.text_input("Classe / Scolarité", placeholder="CE2")
     with col3:
-        ville = st.text_input("Ville de résidence", placeholder="Chatou")
+        ville = st.text_input("Ville de résidence", placeholder="Paris")
         prescripteur = st.text_input(
-            "Médecin prescripteur", placeholder="Dr P. Martin (Chatou)"
+            "Médecin prescripteur", placeholder="Dr P. Martin (Paris)"
         )
         generaliste = st.text_input(
-            "Médecin généraliste", placeholder="Dr D. Dupont (Le Vesinet)"
+            "Médecin généraliste", placeholder="Dr D. Dupont (Paris)"
         )
 
     st.subheader("Composition familiale")
