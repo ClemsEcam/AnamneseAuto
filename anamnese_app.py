@@ -14,18 +14,18 @@ st.markdown(
 
 # --- FORMULAIRE PAR ONGLETS ---
 tabs = st.tabs([
-    "1. Identité & Famille",
-    "2. Motif",
-    "3. Antécédents & Santé",
-    "4. Développement",
-    "5. Vie Quotidienne",
-    "6. École & Garde",
-    "7. Comportement",
-    "8. Suivis & Attentes",
+    "1. Données Générales et Motif",
+    "2. Antécédents et développement périnatal",
+    "3. Évolution moteur",
+    "4. Fonctions vitales et hygiène de vie",
+    "5. Sphère affective, comportement et sociale",
+    "6. Parcours et vécu scolaire",
+    "7. Attentes de la famille",
 ])
 
 with tabs[0]:
-    col1, col2, col3 = st.columns(3)
+    st.subheader("Information Générale")
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         nom = st.text_input("Nom de l'enfant")
         prenom = st.text_input("Prénom de l'enfant")
@@ -44,48 +44,83 @@ with tabs[0]:
         generaliste = st.text_input(
             "Médecin généraliste", placeholder="Dr D. Dupont (Paris)"
         )
-
+    with col4:
+        ecole = st.text_input("École", placeholder="Saint Anne à Paris")
     st.subheader("Composition familiale")
     col_f1, col_f2 = st.columns(2)
     with col_f1:
-        schema_familial = st.selectbox(
-            "Schéma familial",
+        garde_enfant = st.selectbox(
+            "Garde enfant",
             [
-                "Vit avec ses deux parents",
-                "Parents séparés (garde alternée)",
-                "Vit principalement avec sa mère",
-                "Vit principalement avec son père",
+                "ses deux parents",
+                "sa mère",
+                "son père",
                 "Autre",
             ],
         )
-        fratrie = st.text_input(
-            "Fratrie (ex: fils unique / une sœur de 5 ans)",
-            value="enfant unique",
-        )
+        if garde_enfant == "Autre":
+            garde_enfant = st.text_input(
+                "Précisez la garde de l'enfant", 
+                placeholder="Oncle"
+            )
+        schema_familial = st.selectbox(
+            "Schéma familliale",
+            [
+                "parents unis",
+                "séparés",
+                "garde alternée",
+            ],      
+        )                
+        nb_enfants = st.number_input("Nombre d'enfants dans la fratrie", min_value=1, value=1, step=1)
+        if nb_enfants > 1:
+            rang = st.number_input("Position dans la fratrie", min_value=1, max_value=nb_enfants, value=1, step=1)
+        else:
+            rang = 1
         animaux = st.text_input(
             "Animaux de compagnie (optionnel)",
-            placeholder="une petite gerbille prénommée Zoé",
+            placeholder="un chiot",
         )
     with col_f2:
         presents = st.text_input(
-            "Personne(s) présente(s) à l'entretien", value="sa maman"
-        )
-        langues = st.text_input(
-            "Langues parlées à la maison", value="le français"
-        )
-        chambre = st.radio(
-            "Chambre", ["Dispose de sa propre chambre", "Partage sa chambre"]
+            "Personne(s) présente(s) à l'entretien", placeholder="sa maman"
         )
 
-with tabs[1]:
-    indication = st.text_area(
-        "Indication / Motif principal de consultation",
-        placeholder="Difficultés remontées par l’école, difficultés d’inhibition verbale",
-    )
+        nb_langues = st.number_input("Nombre de langues parlées à la maison", min_value=1, value=1, step=1)
+        options_langues = ["français", "anglais", "espagnol", "arabe", "portugais", "italien", "allemand"]
+        if nb_langues > 1:
+            langues = st.multiselect("Langues parlées", options=options_langues)
+        else:
+            saisie_unique = st.text_input("Langue parlée", value="français")
+            langues = [saisie_unique] if saisie_unique else []
+
+    st.subheader("Motif")
     orientateur = st.text_input(
-        "Qui a orienté vers la psychomotricité ?",
-        placeholder="L'enseignante / Le médecin",
+            "Qui a orienté vers la psychomotricité ?",
+            placeholder="L'enseignante / Le médecin",
     )
+    indication = st.text_area(
+        "Raison de la demande",
+        placeholder="un très fort dynamisme au quotidien qui demande beaucoup d’attention",
+    )
+    date_motif = st.text_input(
+        "Depuis quand les difficultés existent",
+        placeholder="3 ans",
+    )
+    col_g1, col_g2 = st.columns(2)
+    with col_g1:
+        options_diagnostics = ["TDAH", "TSA", "TDC", "Dysgraphie", "hypotonie", "hypertonie"]
+        nb_diagnostics_pose = st.number_input("Nombre de diagnostics posé", min_value=0, value=0, step=1)
+        diagnostics_pose = []
+        if nb_diagnostics_pose > 0:
+                diagnostics_pose = st.multiselect("Diagnostic posé", options=options_diagnostics)
+    with col_g2:
+        nb_diagnostics_en_cours = st.number_input("Nombre de diagnostics en cours", min_value=0, value=0, step=1)
+        diagnostics_en_cours = []
+        if nb_diagnostics_en_cours > 0:
+                diagnostics_en_cours = st.multiselect("Diagnostic en cours", options=options_diagnostics)
+
+with tabs[1]:
+    
     detail_motif = st.text_area(
         "Contexte de la demande et observations initiales",
         placeholder="L’enseignante décrit une classe bavarde...",
@@ -217,8 +252,6 @@ with tabs[6]:
         "Caractère et gestion émotionnelle (selon les parents)",
         placeholder="Enfant expressif, parfois dans sa bulle. Intériorise beaucoup ses émotions et cherche à éviter les conflits.",
     )
-
-with tabs[7]:
     suivis_anterieurs = st.text_area(
         "Autres bilans et suivis (orthophonie, psy, etc.)",
         placeholder="A déjà bénéficié d'un suivi en orthophonie ainsi que d'un bilan psychologique sans éléments inquiétants.",
@@ -228,62 +261,129 @@ with tabs[7]:
         placeholder="Les parents expriment le souhait que le bilan permette à l'enfant de s'épanouir pleinement.",
     )
 
+
+# Fonction pour gérer l'élision (le -> l' si voyelle)
+    def formater_langue(langue):
+        voyelles = ("a", "e", "i", "o", "u", "y", "é", "è", "ê", "ë", "à", "â")
+        if langue.lower().startswith(voyelles):
+            return f"l'{langue}"
+        else:
+            return f"le {langue}"
+
 # --- LOGIQUE DE RÉDACTION CONDITIONNELLE ---
 def generer_texte_anamnese():
     il_elle = "Il" if sexe == "Garçon" else "Elle"
+    article = "le" if sexe == "Garçon" else "la"
     p = prenom.strip() if prenom.strip() else "L'enfant"
+    
+    # Formatage de la date de naissance et de la date du jour
+    ddn_str = ddn.strftime('%d/%m/%Y')
+    date_jour = date.today().strftime('%d/%m/%Y')
 
     paragraphes = []
 
-    # Paragraphe 1 : Grossesse & Naissance
+    # 1. Identité
     p1 = []
+    identite_parts = [f"**Identité :** {p} {nom} "]
+    identite_parts.append(f"né{'e' if sexe == 'Fille' else ''} le {ddn_str}")
+    if age_texte:
+        identite_parts.append(f"âgé(e) de {age_texte}")
+    if scolarite:
+        ecole_str = f" à {ecole}" if ecole else ""
+        identite_parts.append(f"scolarisé(e) en classe de {scolarite}{ecole_str}")
+    p1.append(", ".join(identite_parts) + ".")
+    paragraphes.append(" ".join(p1))
+
+    # 2 : Configuration familiale
+    p2 = []
+    famille_parts = [f"**Configuration familiale :**  {p}"]
+    famille_parts.append(f"vit auprès de {garde_enfant} dans le cadre d'un schéma familial {schema_familial}.")
+    p2.append(", ".join(famille_parts))
+    if nb_enfants == 1:
+        statut_fratrie = "fils unique" if sexe == "Garçon" else "fille unique"
+        frat = f"{il_elle} est {statut_fratrie}"
+    else:
+        if rang == 1:
+            ordinal = "1er" if sexe == "Garçon" else "1re"
+        else:
+            ordinal = f"{rang}e"
+        frat = f"{il_elle} est {article} {ordinal} d'une fratrie de {nb_enfants} enfants"
+    p2.append(frat + ".")
+    if animaux:
+        p2.append(f"{il_elle} vit aussi avec {animaux}.")
+    if len(langues) == 1:
+        p2.append(f"La langue parlée au domicile est {formater_langue(langues[0])}.")
+    else:
+        langues_formatees = [formater_langue(l) for l in langues]
+        if len(langues_formatees) == 2:
+            str_langues = f"{langues_formatees[0]} et {langues_formatees[1]}"
+        else:
+            str_langues = ", ".join(langues_formatees[:-1]) + f" et {langues_formatees[-1]}"
+        p2.append(f"Les langues parlées au domicile sont {str_langues}.")
+    paragraphes.append(" ".join(p2))
+
+    # 3 : Motif
+    p3 = [f"**Motif :**"]
+    p3.append(f"L'anamnèse est réalisée le {date_jour} en présence de {presents}.")
+    p3.append(f"La consultation fait suite à une orientation de {orientateur}")
+    p3.append(f"motivée par {indication},")
+    p3.append(f"difficultés observées depuis {date_motif}.")
+    
+    # Génération des phrases de diagnostics
+    diag_phrases = []
+    # 1. Diagnostics posés
+    diags_poses_valides = [d.strip() for d in diagnostics_pose if d and d.strip()]
+    if len(diags_poses_valides) == 1:
+        diag_phrases.append(f"Un diagnostic de {diags_poses_valides[0]} est posé.")
+    elif len(diags_poses_valides) > 1:
+        if len(diags_poses_valides) == 2:
+            str_dp = f"{diags_poses_valides[0]} et {diags_poses_valides[1]}"
+        else:
+            str_dp = ", ".join(diags_poses_valides[:-1]) + f" et {diags_poses_valides[-1]}"
+        diag_phrases.append(f"Des diagnostics de {str_dp} sont posés.")
+
+    # 2. Diagnostics en cours
+    diags_cours_valides = [d.strip() for d in diagnostics_en_cours if d and d.strip()]
+    if len(diags_cours_valides) == 1:
+        diag_phrases.append(f"Un diagnostic de {diags_cours_valides[0]} est en cours.")
+    elif len(diags_cours_valides) > 1:
+        if len(diags_cours_valides) == 2:
+            str_dc = f"{diags_cours_valides[0]} et {diags_cours_valides[1]}"
+        else:
+            str_dc = ", ".join(diags_cours_valides[:-1]) + f" et {diags_cours_valides[-1]}"
+        diag_phrases.append(f"Des diagnostics de {str_dc} sont en cours.")
+
+    p3.append(" ".join(diag_phrases))
+    paragraphes.append(" ".join(p3))
+
+
+    # Paragraphe 4 : Grossesse & Naissance
+    p4 = []
     if grossesse.startswith("Au terme"):
-        p1.append(
+        p4.append(
             f"{p} est né{'e' if sexe=='Fille' else ''} au terme d’une grossesse et"
             " d’un accouchement s’étant déroulés dans la norme."
         )
     elif naissance_details:
-        p1.append(f"Concernant la naissance, {naissance_details}.")
+        p4.append(f"Concernant la naissance, {naissance_details}.")
 
     if cesarienne:
-        p1.append(
+        p4.append(
             f"{il_elle} est né{'e' if sexe=='Fille' else ''} par césarienne."
         )
     if naissance_details and grossesse.startswith("Au terme"):
-        p1.append(f"{naissance_details}.")
+        p4.append(f"{naissance_details}.")
 
     if allaitement.startswith("Allaitement difficile"):
-        p1.append(
+        p4.append(
             f"L’allaitement a été difficile en raison de difficultés de succion."
             f" {il_elle} est donc rapidement passé{'e' if sexe=='Fille' else ''}"
             " au biberon."
         )
     elif allaitement == "Allaitement sans difficulté":
-        p1.append("L'allaitement s'est déroulé sans difficulté.")
-    if p1:
-        paragraphes.append(" ".join(p1))
-
-    # Paragraphe 2 : Famille & Garde
-    p2 = []
-    if "unique" in fratrie.lower():
-        p2.append(
-            f"{p} est {'fille unique' if sexe=='Fille' else 'fils unique'} et"
-            f" {chambre.lower()}."
-        )
-    else:
-        p2.append(f"{p} a {fratrie} et {chambre.lower()}.")
-
-    fam_str = f"{il_elle} {schema_familial.lower()}"
-    if animaux:
-        fam_str += f", ainsi qu’avec {animaux}"
-    p2.append(fam_str + ".")
-
-    if langues:
-        p2.append(f"À la maison, {langues} sont parlées.")
-    if garde:
-        p2.append(f"Concernant le mode de garde avant l'école, {garde[0].lower() + garde[1:]}.")
-    if p2:
-        paragraphes.append(" ".join(p2))
+        p4.append("L'allaitement s'est déroulé sans difficulté.")
+    if p4:
+        paragraphes.append(" ".join(p4))
 
     # Paragraphe 3 : Santé & Sensorialité
     p3 = []
@@ -393,8 +493,19 @@ def creer_docx(paragraphes):
     r_anam.bold = True
     r_anam.underline = True
 
+    # Boucle corrigée pour transformer le markdown (**en gras**) en vrai gras Word
     for p in paragraphes:
-        doc.add_paragraph(p)
+        para_doc = doc.add_paragraph()
+        if p.startswith("**") and "**" in p[2:]:
+            fin_bold = p.find("**", 2)
+            label = p[2:fin_bold]
+            reste = p[fin_bold+2:].strip()
+            
+            run_label = para_doc.add_run(label + " ")
+            run_label.bold = True
+            para_doc.add_run(reste)
+        else:
+            para_doc.add_run(p)
 
     if suivis_anterieurs.strip():
         h_autre = doc.add_paragraph()
@@ -407,7 +518,6 @@ def creer_docx(paragraphes):
     doc.save(buffer)
     buffer.seek(0)
     return buffer
-
 
 # --- VALIDATION ET EXPORT ---
 st.divider()
