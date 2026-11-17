@@ -108,7 +108,7 @@ with tabs[0]:
     )
     col_g1, col_g2 = st.columns(2)
     with col_g1:
-        options_diagnostics = ["TDAH", "TSA", "TDC", "Dysgraphie", "hypotonie", "hypertonie"]
+        options_diagnostics = ["TDAH", "TSA", "TDC", "Dysgraphie", "TOP", "TLE", "TLO"]
         nb_diagnostics_pose = st.number_input("Nombre de diagnostics posé", min_value=0, value=0, step=1)
         diagnostics_pose = []
         if nb_diagnostics_pose > 0:
@@ -119,12 +119,80 @@ with tabs[0]:
         if nb_diagnostics_en_cours > 0:
                 diagnostics_en_cours = st.multiselect("Diagnostic en cours", options=options_diagnostics)
 
+    complement1 = ""
+    complement1_check = st.checkbox("Complément", key="check_comp1")
+    if complement1_check:
+        complement1 = st.text_area("Complément d'information", key="text_comp1")
+
 with tabs[1]:
+    st.subheader("Grossesse et naissance")
+    col_g1, col_g2 = st.columns(2)
+    with col_g1:
+        grossesse = st.selectbox(
+            "Grossesse",
+            [
+                "Grossesse déroulée dans la norme",
+                "Grossesse avec particularités",
+            ],
+        )
+        grossesse_sup = ""  # Initialisation pour éviter les erreurs si la condition n'est pas remplie
+        if grossesse == "Grossesse avec particularités":
+            grossesse_sup = st.text_input("Grossesse marquée par :")
+
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            cesarienne = st.checkbox("Naissance par césarienne")
+            souffrance_foetale = st.checkbox("Souffrance foetale")
+            reanimation_neo = st.checkbox("Réanimation néonatale")
+        with col_f2:
+            score_apgar = st.number_input("Score d'Apgar", min_value=0, value=0,step=1)
+        
+    with col_g2:
+        accouchement = st.selectbox(
+            "Accouchement",
+            [
+                "à terme",
+                "prématuré",
+            ],
+        )
+        if accouchement == "prématuré":
+            accouchement_sup = []
+            accouchement_sup = st.number_input("Prématuré à (nbr de semaines)", min_value=20, max_value=42, value=20, step=1)
+
+        premiers_mois = st.selectbox(
+            "Premiers mois de vie",
+            [
+                "Sans particularité",
+                "Avec particulartié",
+            ],
+        )
+        premiers_mois_sup = []
+        if premiers_mois == "Avec particulartié":
+            premiers_mois_sup = st.text_input("Premiers mois avec particularité")
+
+    st.subheader("Santé et sensorialité")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        bilans_sens = st.checkbox("Bilans sensoriels à jour")
+        sens_tactile = st.radio("Sensibilité tactile", ["Normale", "Hypersensibilité","Hyposensibilité"])
+    with col2:
+        acuite_visu = st.radio("Acuité visuelle", ["Normal", "Nécessite une correction"])
+        acuite_audi = st.radio("Acuité auditive", ["Préservée", "À surveiller"])
+
+    st.subheader("Suivis")
+    options_accompagnants = ["Orthophonie", "Ergothérapie ", "Psychologie ", "Autre"]
+    accompagnement = st.multiselect("Accompagnement thérapeutique", options=options_accompagnants)
+    accompagnement_autre = ""
+    if "Autre" in accompagnement:
+        accompagnement_autre = st.text_input("Précisez les autres métiers d'accompagnement")
     
-    detail_motif = st.text_area(
-        "Contexte de la demande et observations initiales",
-        placeholder="L’enseignante décrit une classe bavarde...",
-    )
+    benefice_acc = st.text_input("Bénéfices de l'accompagnement")
+    
+    complement2 = ""
+    complement2_check = st.checkbox("Complément", key="check_comp2")
+    if complement2_check:
+        complement2 = st.text_area("Complément d'information", key="text_comp2")
+
 
 with tabs[2]:
     col_s1, col_s2 = st.columns(2)
@@ -152,30 +220,6 @@ with tabs[2]:
         )
 
 with tabs[3]:
-    st.subheader("Grossesse et naissance")
-    col_g1, col_g2 = st.columns(2)
-    with col_g1:
-        grossesse = st.selectbox(
-            "Grossesse et accouchement",
-            [
-                "Au terme d'une grossesse et d'un accouchement dans la norme",
-                "Grossesse ou accouchement avec particularités",
-            ],
-        )
-        cesarienne = st.checkbox("Naissance par césarienne")
-        naissance_details = st.text_input(
-            "Précisions naissance / premiers mois",
-            placeholder="Décrit comme un bébé très vif dès la naissance",
-        )
-    with col_g2:
-        allaitement = st.selectbox(
-            "Alimentation nourrisson",
-            [
-                "Allaitement sans difficulté",
-                "Allaitement difficile (difficultés de succion), passage au biberon",
-                "Biberon dès la naissance",
-            ],
-        )
 
     st.subheader("Acquisitions motrices et langagières")
     col_m1, col_m2 = st.columns(2)
@@ -364,23 +408,23 @@ def generer_texte_anamnese():
             f"{p} est né{'e' if sexe=='Fille' else ''} au terme d’une grossesse et"
             " d’un accouchement s’étant déroulés dans la norme."
         )
-    elif naissance_details:
-        p4.append(f"Concernant la naissance, {naissance_details}.")
+    #elif naissance_details:
+        #p4.append(f"Concernant la naissance, {naissance_details}.")
 
     if cesarienne:
         p4.append(
             f"{il_elle} est né{'e' if sexe=='Fille' else ''} par césarienne."
         )
-    if naissance_details and grossesse.startswith("Au terme"):
-        p4.append(f"{naissance_details}.")
+    #if naissance_details and grossesse.startswith("Au terme"):
+        #p4.append(f"{naissance_details}.")
 
-    if allaitement.startswith("Allaitement difficile"):
+    #if allaitement.startswith("Allaitement difficile"):
         p4.append(
             f"L’allaitement a été difficile en raison de difficultés de succion."
             f" {il_elle} est donc rapidement passé{'e' if sexe=='Fille' else ''}"
             " au biberon."
         )
-    elif allaitement == "Allaitement sans difficulté":
+    #elif allaitement == "Allaitement sans difficulté":
         p4.append("L'allaitement s'est déroulé sans difficulté.")
     if p4:
         paragraphes.append(" ".join(p4))
@@ -446,8 +490,8 @@ def generer_texte_anamnese():
         p7.append(vecu_ecole)
     if sociabilite_ecole:
         p7.append(sociabilite_ecole)
-    if detail_motif:
-        p7.append(detail_motif)
+    #if detail_motif:
+        #p7.append(detail_motif)
     if caractere:
         p7.append(f"Selon {presents}, {caractere[0].lower() + caractere[1:]}")
     if attentes_parents:
